@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenAI GPT-3 Streamed Response</title>
+</head>
+<body>
+    <h1>Enter a Question or Request</h1>
+    <form id="promptForm">
+        <input type="text" id="promptInput" name="prompt">
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="responseContainer"></div>
+
+    <script>
+        document.getElementById('promptForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var prompt = document.getElementById('promptInput').value;
+            
+            var eventSource = new EventSource('/get_response?prompt=' + encodeURIComponent(prompt));
+            var responseContainer = document.getElementById('responseContainer');
+            responseContainer.innerHTML = ''; // Clear previous content
+
+            eventSource.onmessage = function(event) {
+                var word = JSON.parse(event.data);
+                var p = document.createElement('span'); // Use span instead of p for words
+                p.textContent = word + ' ';
+                responseContainer.appendChild(p);
+            };
+
+            eventSource.onerror = function(err) {
+                console.error('EventSource failed:', err);
+                eventSource.close();
+            };
+        });
+    </script>
+</body>
+</html>
